@@ -62,6 +62,13 @@ app.get('/api/plants', (req, res) => {
   res.json(filteredPlants);
 });
 
+app.get('/api/plants/:id', (req, res) => {
+  const plants = readJSON('plants.json');
+  const plant = plants.find(p => p.id === req.params.id);
+  if (!plant) return res.status(404).json({ error: 'Plant not found' });
+  res.json(plant);
+});
+
 app.post('/api/plants', (req, res) => {
   const plants = readJSON('plants.json');
   const newPlant = {
@@ -71,6 +78,26 @@ app.post('/api/plants', (req, res) => {
   plants.push(newPlant);
   writeJSON('plants.json', plants);
   res.status(201).json(newPlant);
+});
+
+app.put('/api/plants/:id', (req, res) => {
+  const plants = readJSON('plants.json');
+  const index = plants.findIndex(p => p.id === req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'Plant not found' });
+  
+  plants[index] = { ...plants[index], ...req.body };
+  writeJSON('plants.json', plants);
+  res.json(plants[index]);
+});
+
+app.delete('/api/plants/:id', (req, res) => {
+  const plants = readJSON('plants.json');
+  const index = plants.findIndex(p => p.id === req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'Plant not found' });
+  
+  plants.splice(index, 1);
+  writeJSON('plants.json', plants);
+  res.status(204).send();
 });
 
 // Customers API
@@ -96,6 +123,35 @@ app.get('/api/customers', (req, res) => {
   res.json(filteredCustomers);
 });
 
+app.get('/api/customers/:id', (req, res) => {
+  const customers = readJSON('customers.json');
+  const customer = customers.find(c => c.id === req.params.id);
+  if (!customer) return res.status(404).json({ error: 'Customer not found' });
+  res.json(customer);
+});
+
+app.post('/api/customers', (req, res) => {
+  const customers = readJSON('customers.json');
+  const newCustomer = {
+    id: Date.now().toString(),
+    orders: [],
+    ...req.body
+  };
+  customers.push(newCustomer);
+  writeJSON('customers.json', customers);
+  res.status(201).json(newCustomer);
+});
+
+app.put('/api/customers/:id', (req, res) => {
+  const customers = readJSON('customers.json');
+  const index = customers.findIndex(c => c.id === req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'Customer not found' });
+  
+  customers[index] = { ...customers[index], ...req.body };
+  writeJSON('customers.json', customers);
+  res.json(customers[index]);
+});
+
 // Orders API
 app.get('/api/orders', (req, res) => {
   const orders = readJSON('orders.json');
@@ -114,6 +170,37 @@ app.get('/api/orders', (req, res) => {
   res.json(filteredOrders);
 });
 
+app.get('/api/orders/:id', (req, res) => {
+  const orders = readJSON('orders.json');
+  const order = orders.find(o => o.id === req.params.id);
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+  res.json(order);
+});
+
+app.post('/api/orders', (req, res) => {
+  const orders = readJSON('orders.json');
+  const newOrder = {
+    id: Date.now().toString(),
+    orderDate: new Date().toISOString().split('T')[0],
+    status: 'pending',
+    paymentStatus: 'pending',
+    ...req.body
+  };
+  orders.push(newOrder);
+  writeJSON('orders.json', orders);
+  res.status(201).json(newOrder);
+});
+
+app.patch('/api/orders/:id/status', (req, res) => {
+  const orders = readJSON('orders.json');
+  const index = orders.findIndex(o => o.id === req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'Order not found' });
+  
+  orders[index].status = req.body.status;
+  writeJSON('orders.json', orders);
+  res.json(orders[index]);
+});
+
 // Inventory API
 app.get('/api/inventory', (req, res) => {
   const inventory = readJSON('inventory.json');
@@ -130,6 +217,16 @@ app.get('/api/inventory', (req, res) => {
   }
   
   res.json(filteredInventory);
+});
+
+app.put('/api/inventory/:id', (req, res) => {
+  const inventory = readJSON('inventory.json');
+  const index = inventory.findIndex(i => i.id === req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'Inventory item not found' });
+  
+  inventory[index] = { ...inventory[index], ...req.body };
+  writeJSON('inventory.json', inventory);
+  res.json(inventory[index]);
 });
 
 // Analytics API
